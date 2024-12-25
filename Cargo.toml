@@ -15,12 +15,19 @@ codegen-units = 1
 panic = "abort"
 
 [dependencies]
+futures-util = "0.3"
 argh = { version = "0.1.13" }
+glob = { version = "0.3.1" }
+notify = { version = "7.0.0" }
+config = { version = "0.15.0", features = ["ini", "json", "yaml", "toml", "ron", "json5"] }
+
+serde = { version = "1", features = ["derive"] }
+
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-futures-util = "0.3"
+
 tokio = { version = "1.42", features = ["io-util", "rt-multi-thread", "signal"] }
-tower = { version = "0.5" }
 hyper = { version = "1" }
 hyper-util = "0.1"
+tower = { version = "0.5" }
 axum = { version = "0.7.9" }
