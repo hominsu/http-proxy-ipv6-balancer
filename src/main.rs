@@ -1,11 +1,24 @@
 mod skeleton;
 
+use argh::FromArgs;
 use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
-use std::net::SocketAddr;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+#[derive(FromArgs)]
+#[argh(description = "http-proxy-ipv6-balancer")]
+struct Args {
+    #[argh(
+        option,
+        default = "String::from(\"0.0.0.0:3000\")",
+        description = "address to listen, eg: --bind \"0.0.0.0:3000\""
+    )]
+    bind: String,
+}
 
 #[tokio::main]
 async fn main() {
+    let args: Args = argh::from_env();
+
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
@@ -21,8 +34,7 @@ async fn main() {
     );
     let tower_service = skeleton::V6Balancer::new(router);
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(args.bind).await.unwrap();
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
 
     skeleton::serve(listener, tower_service)
