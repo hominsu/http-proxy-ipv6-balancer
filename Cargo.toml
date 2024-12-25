@@ -1,0 +1,25 @@
+[package]
+name = "http-proxy-ipv6-balancer"
+version = "0.1.0"
+edition = "2021"
+authors = [
+    "Homing So <i@homing.so>"
+]
+description = "A HTTP proxy balancer for IPv6"
+
+[profile.release]
+opt-level = 3
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[dependencies]
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+futures-util = "0.3"
+tokio = { version = "1.42", features = ["io-util", "rt-multi-thread", "signal"] }
+tower = { version = "0.5" }
+hyper = { version = "1" }
+hyper-util = "0.1"
+axum = { version = "0.7.9" }
