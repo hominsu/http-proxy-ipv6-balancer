@@ -10,10 +10,12 @@ use hyper_util::rt::TokioIo;
 use std::{
     convert::Infallible,
     future::Future,
+    io,
+    net::ToSocketAddrs,
     pin::Pin,
     task::{Context, Poll},
 };
-use tokio::net::TcpStream;
+use tokio::net::{TcpSocket, TcpStream};
 use tower::{Service, ServiceExt};
 
 #[derive(Clone)]
@@ -76,8 +78,14 @@ async fn proxy(req: Request) -> Result<Response, Infallible> {
     Ok(Response::new(Body::empty()))
 }
 
-async fn tunnel(upgraded: Upgraded, remote: String) -> std::io::Result<()> {
-    let mut server = TcpStream::connect(remote).await?;
+async fn tunnel(upgraded: Upgraded, remote: String) -> io::Result<()> {
+    let mut server = match connect(&remote).await {
+        Ok(stream) => stream,
+        Err(err) => {
+            tracing::error!("could not connect to remote via IPv6: {:#?}", err);
+            TcpStream::connect(&remote).await? // fallback
+        }
+    };
     let mut client = TokioIo::new(upgraded);
 
     let (from_client, from_server) =
@@ -90,4 +98,26 @@ async fn tunnel(upgraded: Upgraded, remote: String) -> std::io::Result<()> {
     );
 
     Ok(())
+}
+
+async fn connect<A: ToSocketAddrs>(addr: A) -> io::Result<TcpStream> {
+    let addrs = addr.to_socket_addrs()?;
+
+    let mut last_err = None;
+
+    for addr in addrs {
+        let socket = TcpSocket::new_v6()?;
+        socket.bind("[::1]:0".parse().unwrap())?;
+        match socket.connect(addr).await {
+            Ok(stream) => return Ok(stream),
+            Err(e) => last_err = Some(e),
+        }
+    }
+
+    Err(last_err.unwrap_or_else(|| {
+        io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "could not resolve to any address",
+        )
+    }))
 }
