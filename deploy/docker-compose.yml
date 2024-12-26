@@ -1,0 +1,26 @@
+services:
+  http-proxy-ipv6-balancer:
+    image: hominsu/http-proxy-ipv6-balancer:latest
+    container_name: http-proxy-ipv6-balancer
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - "../configs:/data/conf"
+    ports:
+      - "3000:3000"
+    networks:
+      net:
+        ipv6_address: 2001:db8::3
+        aliases:
+          - http-proxy-ipv6-balancer
+
+networks:
+  net:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 2001:db8::/64
+
