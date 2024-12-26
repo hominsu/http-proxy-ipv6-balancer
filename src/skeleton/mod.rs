@@ -1,5 +1,6 @@
 mod conf;
 mod exit;
+pub mod ipv6;
 mod serve;
 mod service;
 

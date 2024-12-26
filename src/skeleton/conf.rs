@@ -1,10 +1,13 @@
 use config::{ConfigError, File};
 use glob::glob;
+use ipnet::Ipv6Net;
 use notify::{Event, RecommendedWatcher, RecursiveMode, Watcher};
 use serde::Deserialize;
 use std::{
+    collections::HashSet,
     future::{Future, IntoFuture},
     io,
+    net::Ipv6Addr,
     path::Path,
     sync::{mpsc, Arc, RwLock},
     time::Duration,
@@ -14,6 +17,8 @@ use std::{
 #[allow(unused)]
 pub struct Config {
     pub addr: String,
+    pub cidr: Ipv6Net,
+    pub excludes: HashSet<Ipv6Addr>,
 }
 
 impl Config {

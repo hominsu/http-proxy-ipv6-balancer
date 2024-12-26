@@ -107,7 +107,7 @@ async fn connect<A: ToSocketAddrs>(addr: A) -> io::Result<TcpStream> {
 
     for addr in addrs {
         let socket = TcpSocket::new_v6()?;
-        socket.bind("[::1]:0".parse().unwrap())?;
+        socket.bind("[::]:0".parse().unwrap())?;
         match socket.connect(addr).await {
             Ok(stream) => return Ok(stream),
             Err(e) => last_err = Some(e),
