@@ -10,15 +10,24 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 struct Args {
     #[argh(
         option,
+        short = 'c',
         default = "String::from(\"configs\")",
         description = "config path, eg: --conf ./configs"
     )]
     conf: String,
+
+    #[argh(switch, short = 'v', description = "print version and quit")]
+    version: bool,
 }
 
 #[tokio::main]
 async fn main() {
     let args: Args = argh::from_env();
+
+    if args.version {
+        println!("http-proxy-ipv6-balancer v{}", env!("CARGO_PKG_VERSION"));
+        return;
+    }
 
     tracing_subscriber::registry()
         .with(
