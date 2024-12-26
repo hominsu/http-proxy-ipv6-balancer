@@ -2,7 +2,7 @@ use ipnet::Ipv6Net;
 use rand::{thread_rng, Rng};
 use std::{collections::HashSet, net::Ipv6Addr};
 
-pub fn random_address_in_cidr(net: Ipv6Net, excludes: &HashSet<Ipv6Addr>) -> Option<Ipv6Addr> {
+pub fn random_address_in_cidr(net: &Ipv6Net, excludes: &HashSet<Ipv6Addr>) -> Option<Ipv6Addr> {
     const MAX_TRIES: usize = 10_000;
 
     let prefix_len = net.prefix_len();

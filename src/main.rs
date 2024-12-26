@@ -46,7 +46,7 @@ async fn main() {
         "/",
         get(|| async { (StatusCode::NOT_FOUND, "Not Found").into_response() }),
     );
-    let tower_service = skeleton::V6Balancer::new(router);
+    let tower_service = skeleton::V6Balancer::new(router, config.clone());
 
     let addr = config.read().unwrap().addr.clone();
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
